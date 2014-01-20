@@ -70,7 +70,7 @@
 
   <p:sink/>
 
-  <p:xslt name="default" template-name="main">
+  <p:xslt name="default" template-name="html2hub">
     <p:input port="parameters"><p:pipe step="params" port="result"/></p:input>
     <p:input port="stylesheet">
       <p:pipe step="lc" port="result"/>
@@ -79,7 +79,7 @@
       <p:pipe port="source" step="html2hub"/>
     </p:input>
   </p:xslt>
-  
+
   <letex:store-debug pipeline-step="html2hub/result" extension="xml">
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
