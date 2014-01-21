@@ -3,6 +3,7 @@
   xmlns:c="http://www.w3.org/ns/xproc-step"  
   xmlns:cx="http://xmlcalabash.com/ns/extensions"
   xmlns:bc="http://transpect.le-tex.de/book-conversion"
+  xmlns:css="http://www.w3.org/1996/css"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns:xhtml = "http://www.w3.org/1999/xhtml"
   xmlns:dbk="http://docbook.org/ns/docbook"
@@ -32,6 +33,7 @@
     
   <p:output port="result" primary="true"/>
   
+  <p:import href="http://transpect.le-tex.de/css-expand/xpl/css.xpl"/>
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl"/>
   <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/load-cascaded.xpl"/>
@@ -60,13 +62,21 @@
     </p:input>
   </p:parameters>
   
+  <css:expand name="add-css-attributes">
+    <p:with-option name="debug" select="$debug" />
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri" />
+    <p:input port="source">
+      <p:pipe port="source" step="html2hub"/>
+    </p:input>
+  </css:expand>
+
   <bc:load-cascaded name="lc" required="no" filename="html2hub/html2hub.xsl" fallback="http://transpect.le-tex.de/html2hub/xsl/html2hub.xsl">
     <p:input port="paths">
       <p:pipe port="paths" step="html2hub"/>
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </bc:load-cascaded>  
+  </bc:load-cascaded>
 
   <p:sink/>
 
@@ -76,7 +86,7 @@
       <p:pipe step="lc" port="result"/>
     </p:input>
     <p:input port="source">
-      <p:pipe port="source" step="html2hub"/>
+      <p:pipe port="result" step="add-css-attributes"/>
     </p:input>
   </p:xslt>
 
