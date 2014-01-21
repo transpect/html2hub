@@ -29,34 +29,43 @@
   <!-- VARIABLES -->
   
   <xsl:variable 
-    name="html2hub-basename" 
-    select="replace(tokenize(base-uri(/),'/')[last()],'.hub.xml','')" 
-    as="xs:string"/>
+      name="html2hub-basename" 
+      select="replace(tokenize(base-uri(/),'/')[last()],'.hub.xml','')" 
+      as="xs:string"/>
 
 
   <!-- OUTPUT -->
- 
+  
   <xsl:output 
-    method="xml" 
-    indent="no"
-    exclude-result-prefixes="#all"
-  />
+      method="xml" 
+      indent="no"
+      exclude-result-prefixes="#all"
+      />
 
   <xsl:output 
-    method="xml" 
-    indent="yes"
-    name="debug"
-    exclude-result-prefixes="#all" 
-  />
+      method="xml" 
+      indent="yes"
+      name="debug"
+      exclude-result-prefixes="#all" 
+      />
 
 
   <!-- INITIAL TEMPLATE -->
 
   <xsl:template name="html2hub">
-    <xsl:if test="//style[@type eq 'text/css']">
-      <xsl:message select="'HTML2HUB WARNING: extract of css style informations not supported yet.'"/>
-    </xsl:if>
-    <xsl:apply-templates select="/" mode="html2hub:default"/>
+    <xsl:variable name="resolve-divs">
+      <xsl:apply-templates select="/" mode="html2hub:resolve-divs"/>
+    </xsl:variable>
+    <xsl:apply-templates select="$resolve-divs" mode="html2hub:default"/>
+  </xsl:template>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <!-- mode: html2hub:resolve-divs -->
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+  <xsl:template match="div" mode="html2hub:resolve-divs">
+    <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
 
@@ -75,13 +84,13 @@
   <xsl:template match="body" mode="html2hub:default">
     <xsl:choose>
       <xsl:when test="$hierarchy-by-h-elements = ('1','true','yes')">
-	<xsl:call-template name="build-sections">
-	  <xsl:with-param name="h-level" select="1" as="xs:integer" />
-	  <xsl:with-param name="nodes" select="node()"/>
-	</xsl:call-template>
+        <xsl:call-template name="build-sections">
+          <xsl:with-param name="h-level" select="1" as="xs:integer" />
+          <xsl:with-param name="nodes" select="node()"/>
+        </xsl:call-template>
       </xsl:when>
       <xsl:otherwise>
-	<xsl:apply-templates select="node()" mode="#current"/>
+        <xsl:apply-templates select="node()" mode="#current"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
@@ -90,49 +99,45 @@
     <xsl:param name="h-level" as="xs:integer" />
     <xsl:param name="nodes" as="node()*" />
     <xsl:variable name="current-level-elementname-regex" as="xs:string"
-      select="concat('^h', $h-level, '$')"/>
+                  select="concat('^h', $h-level, '$')"/>
     <xsl:choose>
       <xsl:when test="$nodes/self::*[matches(local-name(), $current-level-elementname-regex)]">
-	<xsl:for-each-group select="$nodes" group-starting-with="node()[matches(local-name(), $current-level-elementname-regex)]">
-	  <xsl:choose>
-	    <!-- first node in current-group is the correct heading-element, actually -->
-	    <xsl:when test="self::*[matches(local-name(), $current-level-elementname-regex)]">
-	      <section>
-		<title>
-		  <xsl:apply-templates select="./@*" mode="#current" />
-		  <xsl:apply-templates select="./node()" mode="#current" />
-		</title>
-		<xsl:call-template name="build-sections">
-		  <xsl:with-param name="h-level" select="$h-level + 1"/>
-		  <xsl:with-param name="nodes" select="current-group()[position() gt 1]"/>
-		</xsl:call-template>
-	      </section>
-	    </xsl:when>
-	    <xsl:otherwise>
-	      <xsl:call-template name="build-sections">
-		<xsl:with-param name="h-level" select="$h-level + 1"/>
-		<xsl:with-param name="nodes" select="current-group()"/>
-	      </xsl:call-template>
-	    </xsl:otherwise>
-	  </xsl:choose>
-	</xsl:for-each-group>
+        <xsl:for-each-group select="$nodes" group-starting-with="node()[matches(local-name(), $current-level-elementname-regex)]">
+          <xsl:choose>
+            <!-- first node in current-group is the correct heading-element, actually -->
+            <xsl:when test="self::*[matches(local-name(), $current-level-elementname-regex)]">
+              <section>
+                <title>
+                  <xsl:apply-templates select="./@*" mode="#current" />
+                  <xsl:apply-templates select="./node()" mode="#current" />
+                </title>
+                <xsl:call-template name="build-sections">
+                  <xsl:with-param name="h-level" select="$h-level + 1"/>
+                  <xsl:with-param name="nodes" select="current-group()[position() gt 1]"/>
+                </xsl:call-template>
+              </section>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:call-template name="build-sections">
+                <xsl:with-param name="h-level" select="$h-level + 1"/>
+                <xsl:with-param name="nodes" select="current-group()"/>
+              </xsl:call-template>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:for-each-group>
       </xsl:when>
       <!-- hierarchic step -->
       <xsl:when test="not(*[matches(local-name(), $current-level-elementname-regex)]) and
-		      *[matches(local-name(), concat('^h[', $h-level, '-9]'))]">
-	<xsl:call-template name="build-sections">
-	  <xsl:with-param name="h-level" select="$h-level + 1"/>
-	  <xsl:with-param name="nodes" select="$nodes"/>
-	</xsl:call-template>
+                      *[matches(local-name(), concat('^h[', $h-level, '-9]'))]">
+        <xsl:call-template name="build-sections">
+          <xsl:with-param name="h-level" select="$h-level + 1"/>
+          <xsl:with-param name="nodes" select="$nodes"/>
+        </xsl:call-template>
       </xsl:when>
       <xsl:otherwise>
-	<xsl:apply-templates select="$nodes" mode="#current"/>
+        <xsl:apply-templates select="$nodes" mode="#current"/>
       </xsl:otherwise>
     </xsl:choose>
-  </xsl:template>
-
-  <xsl:template match="div" mode="html2hub:default">
-    <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
   <xsl:template match="p" mode="html2hub:default">
@@ -143,26 +148,56 @@
 
   <xsl:template match="img" mode="html2hub:default">
     <xsl:element name="{if(parent::p) then 'inlinemediaobject' else 'mediaobject'}">
+      <xsl:for-each select="@alt">
+        <xsl:element name="{local-name()}">
+          <xsl:value-of select="."/>
+        </xsl:element>
+      </xsl:for-each>
       <imageobject>
-	<imagedata fileref="{@href}" />
+        <imagedata fileref="{@src}">
+          <xsl:for-each select="@width">
+            <xsl:attribute name="{local-name()}" select="."/>
+          </xsl:for-each>
+        </imagedata>
       </imageobject>
     </xsl:element>
+  </xsl:template>
+
+
+  <!-- lists -->
+
+  <xsl:template match="ol" mode="html2hub:default">
+    <orderedlist>
+      <xsl:apply-templates select="@*|node()" mode="#current" />
+    </orderedlist>
+  </xsl:template>
+
+  <xsl:template match="ul" mode="html2hub:default">
+    <itemizedlist>
+      <xsl:apply-templates select="@*|node()" mode="#current" />
+    </itemizedlist>
+  </xsl:template>
+
+  <xsl:template match="li" mode="html2hub:default">
+    <listitem>
+      <xsl:apply-templates select="@*|node()" mode="#current" />
+    </listitem>
   </xsl:template>
 
   <xsl:template match="dl" mode="html2hub:default">
     <variablelist>
       <xsl:apply-templates select="@*" mode="#current" />
       <xsl:for-each select="dt">
-	<varlistentry>
-	  <term>
-	    <xsl:apply-templates select="@*" mode="#current" />
-	    <xsl:apply-templates mode="#current"/>
-	  </term>
-	  <listitem>
-	    <xsl:apply-templates select="following-sibling::dd[1]/@*" mode="#current" />
-	    <xsl:apply-templates select="following-sibling::dd[1]" mode="#current"/>
-	  </listitem>
-	</varlistentry>
+        <varlistentry>
+          <term>
+            <xsl:apply-templates select="@*" mode="#current" />
+            <xsl:apply-templates mode="#current"/>
+          </term>
+          <listitem>
+            <xsl:apply-templates select="following-sibling::dd[1]/@*" mode="#current" />
+            <xsl:apply-templates select="following-sibling::dd[1]" mode="#current"/>
+          </listitem>
+        </varlistentry>
       </xsl:for-each>
     </variablelist>
   </xsl:template>
@@ -170,15 +205,16 @@
   <xsl:template match="dd" mode="html2hub:default">
     <xsl:choose>
       <xsl:when test="p">
-	<xsl:apply-templates mode="#current" />
+        <xsl:apply-templates mode="#current" />
       </xsl:when>
       <xsl:otherwise>
-	<para>
-	  <xsl:apply-templates mode="#current" />
-	</para>
+        <para>
+          <xsl:apply-templates mode="#current" />
+        </para>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+
 
   <xsl:template match="span" mode="html2hub:default">
     <phrase>
@@ -193,26 +229,26 @@
   <xsl:template match="a[@*]" mode="html2hub:default">
     <xsl:choose>
       <xsl:when test="not(.//text())">
-	<anchor id="{(@xml:id, @id)}"/>
+        <anchor id="{(@xml:id, @id)}"/>
       </xsl:when>
       <xsl:when test="matches(@href, '^(www\.|http://)')">
-	<ulink>
-	  <xsl:attribute name="url" select="@href"/>
-	  <xsl:apply-templates mode="#current"/>
-	</ulink>
+        <ulink>
+          <xsl:attribute name="url" select="@href"/>
+          <xsl:apply-templates mode="#current"/>
+        </ulink>
       </xsl:when>
       <xsl:when test="matches(@href, '^#')">
-	<xref linkend="{substring(@href, 2)}">
-	  <xsl:apply-templates select="@* except @href, node()" mode="#current"/>
-	</xref>
+        <xref linkend="{substring(@href, 2)}">
+          <xsl:apply-templates select="@* except @href, node()" mode="#current"/>
+        </xref>
       </xsl:when>
       <xsl:when test="@href">
-	<ulink url="{@href}">
-	  <xsl:apply-templates select="@* except @href, node()" mode="#current"/>
-	</ulink>
+        <ulink url="{@href}">
+          <xsl:apply-templates select="@* except @href, node()" mode="#current"/>
+        </ulink>
       </xsl:when>
       <xsl:otherwise>
-	<xsl:next-match/>
+        <xsl:next-match/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
@@ -259,6 +295,71 @@
     <xsl:attribute name="role" select="."/>
   </xsl:template>
 
+
+  <!-- font properties -->
+
+  <xsl:template match="i" mode="html2hub:default">
+    <emphasis remap="{local-name()}">
+      <xsl:if test="not(@css:font-style)">
+        <xsl:attribute name="css:font-style" select="'italic'"/>
+      </xsl:if>
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </emphasis>
+  </xsl:template>
+
+  <xsl:template match="b" mode="html2hub:default">
+    <emphasis remap="{local-name()}">
+      <xsl:if test="not(@css:font-weight)">
+        <xsl:attribute name="css:font-weight" select="'bold'"/>
+      </xsl:if>
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </emphasis>
+  </xsl:template>
+
+  <xsl:template match="big" mode="html2hub:default">
+    <emphasis remap="{local-name()}">
+      <xsl:if test="not(@css:font-size)">
+        <xsl:attribute name="css:font-size" select="'larger'"/>
+      </xsl:if>
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </emphasis>
+  </xsl:template>
+
+  <xsl:template match="small" mode="html2hub:default">
+    <emphasis remap="{local-name()}">
+      <xsl:if test="not(@css:font-size)">
+        <xsl:attribute name="css:font-size" select="'smaller'"/>
+      </xsl:if>
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </emphasis>
+  </xsl:template>
+
+  <xsl:template match="tt" mode="html2hub:default">
+    <emphasis remap="{local-name()}">
+      <xsl:if test="not(@css:font-family)">
+        <xsl:attribute name="css:font-family" select="'Monospace'"/>
+      </xsl:if>
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </emphasis>
+  </xsl:template>
+
+  <xsl:template match="u" mode="html2hub:default">
+    <emphasis remap="{local-name()}">
+      <xsl:if test="not(@css:text-decoration)">
+        <xsl:attribute name="css:text-decoration" select="'underline'"/>
+      </xsl:if>
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </emphasis>
+  </xsl:template>
+
+  <xsl:template match="strike | s" mode="html2hub:default">
+    <emphasis remap="{local-name()}">
+      <xsl:if test="not(@css:text-decoration)">
+        <xsl:attribute name="css:text-decoration" select="'line-through'"/>
+      </xsl:if>
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </emphasis>
+  </xsl:template>
 
 
   <!-- catch all -->
