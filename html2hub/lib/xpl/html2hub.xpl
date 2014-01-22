@@ -30,8 +30,14 @@
     rather use the default XSLT, you can submit <p:empty/> to this port.</p:documentation>
   </p:input>
   <p:input port="other-params" sequence="true" kind="parameter" primary="true"/>
+  <p:input port="schema" primary="false">
+    <p:documentation>Excepts the Hub RelaxNG XML schema</p:documentation>
+    <p:document href="../../common/../../frontend/schema/Hub/hub.rng"/>
+  </p:input>
     
-  <p:output port="result" primary="true"/>
+  <p:output port="result" primary="true">
+    <p:pipe port="result" step="hub"/>
+  </p:output>
   
   <p:import href="http://transpect.le-tex.de/css-expand/xpl/css.xpl"/>
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
@@ -39,6 +45,7 @@
   <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/load-cascaded.xpl"/>
   <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/simple-progress-msg.xpl"/>
   <p:import href="http://transpect.le-tex.de/xproc-util/xslt-mode/xslt-mode.xpl"/>
+  <p:import href="http://transpect.le-tex.de/calabash-extensions/ltx-validate-with-rng/rng-validate-to-PI.xpl"/>
   
   <p:variable name="status-dir-uri" select="concat($debug-dir-uri, '/status')"/>
   
@@ -93,7 +100,7 @@
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </letex:xslt-mode>
 
-  <letex:xslt-mode msg="yes" hub-version="1.1" prefix="html2hub/02" mode="html2hub:default">
+  <letex:xslt-mode msg="yes" hub-version="1.1" prefix="html2hub/02" mode="html2hub:default" name="hub">
     <p:input port="stylesheet">
       <p:pipe step="lc" port="result"/>
     </p:input>
@@ -103,6 +110,19 @@
   </letex:xslt-mode>
   
   <letex:store-debug pipeline-step="html2hub/result" extension="xml">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </letex:store-debug>
+
+  <letex:validate-with-rng-PI name="rng2pi">
+    <p:with-option name="debug" select="$debug"/>
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+    <p:input port="schema">
+      <p:pipe port="schema" step="html2hub"/>
+    </p:input>
+  </letex:validate-with-rng-PI>
+  
+  <letex:store-debug pipeline-step="rngvalid/with-PIs">
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </letex:store-debug>
@@ -119,4 +139,6 @@
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
   </letex:simple-progress-msg>
   
+  <p:sink/>
+
 </p:declare-step>
