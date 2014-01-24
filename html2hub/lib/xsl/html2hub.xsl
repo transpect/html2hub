@@ -24,7 +24,7 @@
 
   <xsl:param name="debug" select="'no'"/>
   <xsl:param name="debugdir" select="'debug'"/>
-  <xsl:param name="hierarchy-by-h-elements" select="'1'"/>
+  <xsl:param name="hierarchy-by-h-elements" select="'no'"/>
   
   <!-- VARIABLES -->
   
@@ -111,10 +111,7 @@
             <xsl:when test="self::*[matches(local-name(), $current-level-elementname-regex)]">
               <section>
                 <title>
-                  <xsl:apply-templates select="./@* except @title" mode="#current" />
-                  <xsl:for-each select="@title">
-                    <xsl:attribute name="annotations" select="."/>
-                  </xsl:for-each>
+                  <xsl:apply-templates select="./@*" mode="#current" />
                   <xsl:apply-templates select="./node()" mode="#current" />
                 </title>
                 <xsl:call-template name="build-sections">
@@ -144,6 +141,16 @@
         <xsl:apply-templates select="$nodes" mode="#current"/>
       </xsl:otherwise>
     </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="h1 | h2 | h3 | h4 | h5 | h6" mode="html2hub:default">
+    <para remap="{local-name()}">
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </para>
+  </xsl:template>
+
+  <xsl:template match="@title" mode="html2hub:default">
+    <xsl:attribute name="annotations" select="."/>
   </xsl:template>
 
   <xsl:template match="p" mode="html2hub:default">
@@ -318,66 +325,66 @@
   <!-- font properties -->
 
   <xsl:template match="i" mode="html2hub:default">
-    <emphasis remap="{local-name()}">
+    <phrase remap="{local-name()}">
       <xsl:if test="not(@css:font-style)">
         <xsl:attribute name="css:font-style" select="'italic'"/>
       </xsl:if>
       <xsl:apply-templates select="@*|node()" mode="#current"/>
-    </emphasis>
+    </phrase>
   </xsl:template>
 
   <xsl:template match="b | strong" mode="html2hub:default">
-    <emphasis remap="{local-name()}">
+    <phrase remap="{local-name()}">
       <xsl:if test="not(@css:font-weight)">
         <xsl:attribute name="css:font-weight" select="'bold'"/>
       </xsl:if>
       <xsl:apply-templates select="@*|node()" mode="#current"/>
-    </emphasis>
+    </phrase>
   </xsl:template>
 
   <xsl:template match="big" mode="html2hub:default">
-    <emphasis remap="{local-name()}">
+    <phrase remap="{local-name()}">
       <xsl:if test="not(@css:font-size)">
         <xsl:attribute name="css:font-size" select="'larger'"/>
       </xsl:if>
       <xsl:apply-templates select="@*|node()" mode="#current"/>
-    </emphasis>
+    </phrase>
   </xsl:template>
 
   <xsl:template match="small" mode="html2hub:default">
-    <emphasis remap="{local-name()}">
+    <phrase remap="{local-name()}">
       <xsl:if test="not(@css:font-size)">
         <xsl:attribute name="css:font-size" select="'smaller'"/>
       </xsl:if>
       <xsl:apply-templates select="@*|node()" mode="#current"/>
-    </emphasis>
+    </phrase>
   </xsl:template>
 
   <xsl:template match="tt" mode="html2hub:default">
-    <emphasis remap="{local-name()}">
+    <phrase remap="{local-name()}">
       <xsl:if test="not(@css:font-family)">
         <xsl:attribute name="css:font-family" select="'Monospace'"/>
       </xsl:if>
       <xsl:apply-templates select="@*|node()" mode="#current"/>
-    </emphasis>
+    </phrase>
   </xsl:template>
 
   <xsl:template match="u" mode="html2hub:default">
-    <emphasis remap="{local-name()}">
+    <phrase remap="{local-name()}">
       <xsl:if test="not(@css:text-decoration)">
         <xsl:attribute name="css:text-decoration" select="'underline'"/>
       </xsl:if>
       <xsl:apply-templates select="@*|node()" mode="#current"/>
-    </emphasis>
+    </phrase>
   </xsl:template>
 
   <xsl:template match="strike | s" mode="html2hub:default">
-    <emphasis remap="{local-name()}">
+    <phrase remap="{local-name()}">
       <xsl:if test="not(@css:text-decoration)">
         <xsl:attribute name="css:text-decoration" select="'line-through'"/>
       </xsl:if>
       <xsl:apply-templates select="@*|node()" mode="#current"/>
-    </emphasis>
+    </phrase>
   </xsl:template>
 
 
