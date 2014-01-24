@@ -53,7 +53,7 @@
   <!-- INITIAL TEMPLATE -->
 
   <xsl:template name="html2hub">
-    <xsl:variable name="resolve-divs">
+    <xsl:variable name="resolve-divs" as="node()+">
       <xsl:apply-templates select="/" mode="html2hub:resolve-divs"/>
     </xsl:variable>
     <xsl:apply-templates select="$resolve-divs" mode="html2hub:default"/>
@@ -75,6 +75,9 @@
 
   <xsl:template match="html" mode="html2hub:default">
     <chapter>
+      <info>
+        <title/>
+      </info>
       <xsl:apply-templates mode="#current"/>
     </chapter>
   </xsl:template>
@@ -108,7 +111,10 @@
             <xsl:when test="self::*[matches(local-name(), $current-level-elementname-regex)]">
               <section>
                 <title>
-                  <xsl:apply-templates select="./@*" mode="#current" />
+                  <xsl:apply-templates select="./@* except @title" mode="#current" />
+                  <xsl:for-each select="@title">
+                    <xsl:attribute name="annotations" select="."/>
+                  </xsl:for-each>
                   <xsl:apply-templates select="./node()" mode="#current" />
                 </title>
                 <xsl:call-template name="build-sections">
@@ -178,9 +184,22 @@
     </itemizedlist>
   </xsl:template>
 
+  <xsl:variable name="html-inline-elements" as="xs:string*" 
+                select="('a','abbr','acronym','b','basefont','bdo','big','br','button','cite','code','del','dfn','em','font','i','img','ins','input','iframe','kbd','label','map','object','q','s','samp','script','select','small','span','strong','sub','sup','textarea','tt','var','u')" />
+
   <xsl:template match="li" mode="html2hub:default">
     <listitem>
-      <xsl:apply-templates select="@*|node()" mode="#current" />
+      <xsl:apply-templates select="@*" mode="#current" />
+      <xsl:choose>
+        <xsl:when test="every $c in node() satisfies $c[local-name()=$html-inline-elements or self::text()]">
+          <para>
+            <xsl:apply-templates select="node()" mode="#current" />
+          </para>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:apply-templates select="node()" mode="#current" />
+        </xsl:otherwise>
+      </xsl:choose>
     </listitem>
   </xsl:template>
 
@@ -229,13 +248,13 @@
   <xsl:template match="a[@*]" mode="html2hub:default">
     <xsl:choose>
       <xsl:when test="not(.//text())">
-        <anchor id="{(@xml:id, @id)}"/>
+        <anchor xml:id="{(@xml:id, @id)}"/>
       </xsl:when>
       <xsl:when test="matches(@href, '^(www\.|http://)')">
-        <ulink>
-          <xsl:attribute name="url" select="@href"/>
+        <link>
+          <xsl:attribute name="xlink:href" select="@href"/>
           <xsl:apply-templates mode="#current"/>
-        </ulink>
+        </link>
       </xsl:when>
       <xsl:when test="matches(@href, '^#')">
         <xref linkend="{substring(@href, 2)}">
@@ -243,9 +262,9 @@
         </xref>
       </xsl:when>
       <xsl:when test="@href">
-        <ulink url="{@href}">
+        <link linkend="{@href}">
           <xsl:apply-templates select="@* except @href, node()" mode="#current"/>
-        </ulink>
+        </link>
       </xsl:when>
       <xsl:otherwise>
         <xsl:next-match/>
@@ -307,7 +326,7 @@
     </emphasis>
   </xsl:template>
 
-  <xsl:template match="b" mode="html2hub:default">
+  <xsl:template match="b | strong" mode="html2hub:default">
     <emphasis remap="{local-name()}">
       <xsl:if test="not(@css:font-weight)">
         <xsl:attribute name="css:font-weight" select="'bold'"/>
