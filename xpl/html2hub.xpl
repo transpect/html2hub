@@ -15,19 +15,12 @@
   type="html2hub:convert"
   >
 
-  <p:documentation>IMPORTANT: If you are already invoking this step without a paths
-  port, your pipeline probably won’t work any more. Please add the following connection
-  to the invocation:
-    &lt;p:input port="paths"&gt;&lt;p:empty/&gt;&lt;/p:input&gt;
-  </p:documentation>
-
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" required="false" select="resolve-uri('debug')"/>
 
   <p:input port="source" primary="true"/>
-  <p:input port="paths" sequence="true">
-    <p:documentation>If you don’t want to use the bc:load-cascaded mechanism but 
-    rather use the default XSLT, you can submit <p:empty/> to this port.</p:documentation>
+  <p:input port="stylesheet">
+    <p:document href="../xsl/html2hub.xsl"/>
   </p:input>
   <p:input port="other-params" sequence="true" kind="parameter" primary="true"/>
   <p:input port="schema" primary="false">
@@ -42,7 +35,6 @@
   <p:import href="http://transpect.le-tex.de/css-expand/xpl/css.xpl"/>
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl"/>
-  <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/load-cascaded.xpl"/>
   <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/simple-progress-msg.xpl"/>
   <p:import href="http://transpect.le-tex.de/xproc-util/xslt-mode/xslt-mode.xpl"/>
   <p:import href="http://transpect.le-tex.de/calabash-extensions/ltx-validate-with-rng/rng-validate-to-PI.xpl"/>
@@ -65,7 +57,6 @@
   
   <p:parameters name="params">
     <p:input port="parameters">
-      <p:pipe step="html2hub" port="paths"/>
       <p:pipe step="html2hub" port="other-params"/>
     </p:input>
   </p:parameters>
@@ -77,20 +68,10 @@
       <p:pipe port="source" step="html2hub"/>
     </p:input>
   </css:expand>
-
-  <bc:load-cascaded name="lc" required="no" filename="html2hub/html2hub.xsl" fallback="http://transpect.le-tex.de/html2hub/xsl/html2hub.xsl">
-    <p:input port="paths">
-      <p:pipe port="paths" step="html2hub"/>
-    </p:input>
-    <p:with-option name="debug" select="$debug"/>
-    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </bc:load-cascaded>
-  
-  <p:sink/>
   
   <letex:xslt-mode msg="yes" hub-version="1.1" prefix="html2hub/01" mode="html2hub:resolve-divs">
     <p:input port="stylesheet">
-      <p:pipe step="lc" port="result"/>
+      <p:pipe step="html2hub" port="stylesheet"/>
     </p:input>
     <p:input port="source">
       <p:pipe port="result" step="add-css-attributes"/>
@@ -102,7 +83,7 @@
 
   <letex:xslt-mode msg="yes" hub-version="1.1" prefix="html2hub/02" mode="html2hub:default" name="hub">
     <p:input port="stylesheet">
-      <p:pipe step="lc" port="result"/>
+      <p:pipe step="html2hub" port="stylesheet"/>
     </p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
