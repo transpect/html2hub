@@ -40,8 +40,11 @@
   <p:import href="http://transpect.le-tex.de/calabash-extensions/ltx-validate-with-rng/rng-validate-to-PI.xpl"/>
   
   <p:variable name="status-dir-uri" select="concat($debug-dir-uri, '/status')"/>
-  
-  <letex:simple-progress-msg name="start-msg" file="hub2html-start.txt">
+  <p:variable name="basename" select="replace(base-uri(), '^(.+?)([^/\\]+)\.x?html$', '$2')"/>
+
+
+  <letex:simple-progress-msg name="start-msg">
+    <p:with-option name="file" select="concat('hub2html-start.',$basename,'.txt')"/>
     <p:input port="msgs">
       <p:inline>
         <c:messages>
@@ -69,7 +72,8 @@
     </p:input>
   </css:expand>
   
-  <letex:xslt-mode msg="yes" hub-version="1.1" prefix="html2hub/01" mode="html2hub:resolve-divs">
+  <letex:xslt-mode msg="yes" hub-version="1.1" mode="html2hub:resolve-divs">
+    <p:with-option name="prefix" select="concat('html2hub/01.',$basename)"/>
     <p:input port="stylesheet">
       <p:pipe step="html2hub" port="stylesheet"/>
     </p:input>
@@ -81,7 +85,8 @@
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </letex:xslt-mode>
 
-  <letex:xslt-mode msg="yes" hub-version="1.1" prefix="html2hub/02" mode="html2hub:default" name="hub">
+  <letex:xslt-mode msg="yes" hub-version="1.1" mode="html2hub:default" name="hub">
+    <p:with-option name="prefix" select="concat('html2hub/02.',$basename)"/>
     <p:input port="stylesheet">
       <p:pipe step="html2hub" port="stylesheet"/>
     </p:input>
@@ -103,12 +108,14 @@
     </p:input>
   </letex:validate-with-rng-PI>
   
-  <letex:store-debug pipeline-step="rngvalid/with-PIs">
+  <letex:store-debug>
+    <p:with-option name="pipeline-step" select="concat('rngvalid/',$basename,'.with-PIs')"/>
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </letex:store-debug>
 
-  <letex:simple-progress-msg name="success-msg" file="hub2html-success.txt">
+  <letex:simple-progress-msg name="success-msg">
+    <p:with-option name="file" select="concat('hub2html-success.',$basename,'.txt')"/>
     <p:input port="msgs">
       <p:inline>
         <c:messages>

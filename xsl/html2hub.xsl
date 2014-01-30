@@ -75,6 +75,7 @@
 
   <xsl:template match="html" mode="html2hub:default">
     <chapter>
+      <xsl:apply-templates select="@xml:base" mode="#current" />
       <info>
         <title/>
       </info>
@@ -176,6 +177,15 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="*:svg" mode="html2hub:default">
+    <xsl:element name="{if(parent::p) then 'inlinemediaobject' else 'mediaobject'}">
+      <imageobject>
+        <imagedata>
+          <xsl:copy-of select="." />
+        </imagedata>
+      </imageobject>
+    </xsl:element>
+  </xsl:template>
 
   <!-- lists -->
 
