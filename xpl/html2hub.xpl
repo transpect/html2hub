@@ -18,6 +18,9 @@
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" required="false" select="resolve-uri('debug')"/>
 
+  <p:option name="prepend-hub-xml-model" required="false" select="'true'"/>
+  <p:option name="hub-version" select="'1.1'"/>
+
   <p:input port="source" primary="true"/>
   <p:input port="stylesheet">
     <p:document href="../xsl/html2hub.xsl"/>
@@ -29,7 +32,7 @@
   </p:input>
     
   <p:output port="result" primary="true">
-    <p:pipe port="result" step="hub"/>
+    <p:pipe port="result" step="include-hub-model"/>
   </p:output>
   
   <p:import href="http://transpect.le-tex.de/css-expand/xpl/css.xpl"/>
@@ -81,6 +84,25 @@
   </p:xslt>
   
   <letex:store-debug pipeline-step="html2hub/result" extension="xml">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </letex:store-debug>
+
+  <p:choose>
+    <p:when test="$prepend-hub-xml-model='true'">
+      <letex:prepend-hub-xml-model>
+        <p:with-option name="hub-version" select="$hub-version"/>
+      </letex:prepend-hub-xml-model>
+    </p:when>
+    <p:otherwise>
+      <p:identity/>
+    </p:otherwise>
+  </p:choose>
+
+  <p:identity name="include-hub-model"/>
+
+  <letex:store-debug>
+    <p:with-option name="pipeline-step" select="concat('xml-model/',$basename,'.with-PIs')"/>
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </letex:store-debug>
