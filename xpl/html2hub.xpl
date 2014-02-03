@@ -36,7 +36,6 @@
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl"/>
   <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/simple-progress-msg.xpl"/>
-  <p:import href="http://transpect.le-tex.de/xproc-util/xslt-mode/xslt-mode.xpl"/>
   <p:import href="http://transpect.le-tex.de/calabash-extensions/ltx-validate-with-rng/rng-validate-to-PI.xpl"/>
   
   <p:variable name="status-dir-uri" select="concat($debug-dir-uri, '/status')"/>
@@ -72,28 +71,14 @@
     </p:input>
   </css:expand>
   
-  <letex:xslt-mode msg="yes" hub-version="1.1" mode="html2hub:resolve-divs">
-    <p:with-option name="prefix" select="concat('html2hub/01.',$basename)"/>
-    <p:input port="stylesheet">
-      <p:pipe step="html2hub" port="stylesheet"/>
-    </p:input>
+  <p:xslt name="hub" initial-mode="html2hub:default">
     <p:input port="source">
       <p:pipe port="result" step="add-css-attributes"/>
     </p:input>
-    <p:input port="models"><p:empty/></p:input>
-    <p:with-option name="debug" select="$debug"/>
-    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </letex:xslt-mode>
-
-  <letex:xslt-mode msg="yes" hub-version="1.1" mode="html2hub:default" name="hub">
-    <p:with-option name="prefix" select="concat('html2hub/02.',$basename)"/>
     <p:input port="stylesheet">
       <p:pipe step="html2hub" port="stylesheet"/>
     </p:input>
-    <p:input port="models"><p:empty/></p:input>
-    <p:with-option name="debug" select="$debug"/>
-    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </letex:xslt-mode>
+  </p:xslt>
   
   <letex:store-debug pipeline-step="html2hub/result" extension="xml">
     <p:with-option name="active" select="$debug"/>

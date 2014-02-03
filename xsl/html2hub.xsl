@@ -4,28 +4,26 @@
     xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
     xmlns:saxon = "http://saxon.sf.net/"
     xmlns:xs = "http://www.w3.org/2001/XMLSchema"
-    xmlns:aid5 = "http://ns.adobe.com/AdobeInDesign/5.0/"
-    xmlns:aid = "http://ns.adobe.com/AdobeInDesign/4.0/"
-    xmlns:idPkg = "http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging"
-    xmlns:idml2xml = "http://www.le-tex.de/namespace/idml2xml"
     xmlns:xhtml = "http://www.w3.org/1999/xhtml"
     xmlns:css = "http://www.w3.org/1996/css"
     xmlns:hub = "http://www.le-tex.de/namespace/hub"
     xmlns:xlink = "http://www.w3.org/1999/xlink"
     xmlns:dbk = "http://docbook.org/ns/docbook"
+    xmlns:svg = "http://www.w3.org/2000/svg"
     xmlns:html2hub = "http://www.le-tex.de/namespace/html2hub"
-    xmlns:docx2hub = "http://www.le-tex.de/namespace/docx2hub"
     xmlns:letex = "http://www.le-tex.de/namespace"
     xmlns="http://docbook.org/ns/docbook"
     xpath-default-namespace="http://www.w3.org/1999/xhtml"
     >
 
+
   <!-- PARAMS -->
 
   <xsl:param name="debug" select="'no'"/>
-  <xsl:param name="debugdir" select="'debug'"/>
-  <xsl:param name="hierarchy-by-h-elements" select="'no'"/>
+  <xsl:param name="debug-dir" select="'debug'"/>
+  <xsl:param name="hierarchy-by-h-elements" select="'no'"/><!-- hierarchization should be done by evolve-hub -->
   
+
   <!-- VARIABLES -->
   
   <xsl:variable 
@@ -53,19 +51,7 @@
   <!-- INITIAL TEMPLATE -->
 
   <xsl:template name="html2hub">
-    <xsl:variable name="resolve-divs" as="node()+">
-      <xsl:apply-templates select="/" mode="html2hub:resolve-divs"/>
-    </xsl:variable>
-    <xsl:apply-templates select="$resolve-divs" mode="html2hub:default"/>
-  </xsl:template>
-
-
-  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-  <!-- mode: html2hub:resolve-divs -->
-  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-
-  <xsl:template match="div" mode="html2hub:resolve-divs">
-    <xsl:apply-templates mode="#current"/>
+    <xsl:apply-templates select="/" mode="html2hub:default"/>
   </xsl:template>
 
 
@@ -154,6 +140,12 @@
     <xsl:attribute name="annotations" select="."/>
   </xsl:template>
 
+  <xsl:template match="div" mode="html2hub:default">
+    <xsl:element name="{local-name()}">
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:element>
+  </xsl:template>
+
   <xsl:template match="p" mode="html2hub:default">
     <para>
       <xsl:apply-templates select="@*, node()" mode="#current"/>
@@ -161,7 +153,7 @@
   </xsl:template>
 
   <xsl:template match="img" mode="html2hub:default">
-    <xsl:element name="{if(parent::p) then 'inlinemediaobject' else 'mediaobject'}">
+    <xsl:element name="{if (parent::p) then 'inlinemediaobject' else 'mediaobject'}">
       <xsl:for-each select="@alt">
         <xsl:element name="{local-name()}">
           <xsl:value-of select="."/>
@@ -177,13 +169,22 @@
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="*:svg" mode="html2hub:default">
-    <xsl:element name="{if(parent::p) then 'inlinemediaobject' else 'mediaobject'}">
+  <xsl:template match="svg:svg" mode="html2hub:default">
+    <xsl:element name="{if (parent::p) then 'inlinemediaobject' else 'mediaobject'}">
       <imageobject>
         <imagedata>
-          <xsl:copy-of select="." />
+          <xsl:element name="svg" xmlns="http://www.w3.org/2000/svg">
+            <xsl:apply-templates select="@*" mode="#current"/>
+            <xsl:apply-templates select="node()" mode="#current"/>
+          </xsl:element>
         </imagedata>
       </imageobject>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="svg:image" mode="html2hub:default">
+    <xsl:element name="{local-name()}" xmlns="http://www.w3.org/2000/svg">
+      <xsl:apply-templates select="@*|node()" mode="#current" />
     </xsl:element>
   </xsl:template>
 
@@ -290,6 +291,10 @@
   </xsl:template>
 
   <xsl:template match="a/@shape" mode="html2hub:default" />
+
+  <xsl:template match="@id" mode="html2hub:default">
+    <xsl:attribute name="xml:id" select="." />
+  </xsl:template>
 
   <xsl:template match="hr" mode="html2hub:default">
     <hr>
