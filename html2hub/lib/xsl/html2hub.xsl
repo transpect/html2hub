@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xsl:stylesheet 
     version="2.0"
-    xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
-    xmlns:saxon = "http://saxon.sf.net/"
-    xmlns:xs = "http://www.w3.org/2001/XMLSchema"
-    xmlns:xhtml = "http://www.w3.org/1999/xhtml"
     xmlns:css = "http://www.w3.org/1996/css"
-    xmlns:hub = "http://www.le-tex.de/namespace/hub"
-    xmlns:xlink = "http://www.w3.org/1999/xlink"
-    xmlns:dbk = "http://docbook.org/ns/docbook"
-    xmlns:svg = "http://www.w3.org/2000/svg"
     xmlns:html2hub = "http://www.le-tex.de/namespace/html2hub"
-    xmlns:letex = "http://www.le-tex.de/namespace"
+    xmlns:svg = "http://www.w3.org/2000/svg"
+    xmlns:xhtml = "http://www.w3.org/1999/xhtml"
+    xmlns:xlink = "http://www.w3.org/1999/xlink"
+    xmlns:xs = "http://www.w3.org/2001/XMLSchema"
+    xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
     xmlns="http://docbook.org/ns/docbook"
     xpath-default-namespace="http://www.w3.org/1999/xhtml"
     >
@@ -46,6 +42,8 @@
       name="debug"
       exclude-result-prefixes="#all" 
       />
+
+  <xsl:strip-space elements="body div dl head html ol table ul svg:svg"/>
 
 
   <!-- INITIAL TEMPLATE -->
@@ -400,6 +398,12 @@
       </xsl:if>
       <xsl:apply-templates select="@*|node()" mode="#current"/>
     </phrase>
+  </xsl:template>
+
+
+  <!-- text replacements: breaks and multiple whitespace -->
+  <xsl:template match="text()[matches(., '(\s\s+|&#xa;)')]" mode="html2hub:default">
+    <xsl:value-of select="replace(replace(., '&#xa;', ' '), '(\s)\s+', '$1')"/>
   </xsl:template>
 
 
