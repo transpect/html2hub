@@ -21,6 +21,9 @@
   <p:option name="prepend-hub-xml-model" required="false" select="'true'"/>
   <p:option name="hub-version" select="'1.1'"/>
 
+  <p:option name="archive-dir-uri" required="false" select="''"/>
+  <p:option name="src-type" required="false" select="'xhtml11'"/>
+
   <p:input port="source" primary="true"/>
   <p:input port="stylesheet">
     <p:document href="../xsl/html2hub.xsl"/>
@@ -88,6 +91,21 @@
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </letex:store-debug>
 
+  <p:sink/>
+
+  <p:load name="load-hub-keywords-stylesheet" href="../xsl/hub-keywords.xsl"/>
+
+  <p:xslt name="hub-keywords">
+    <p:input port="source">
+      <p:pipe port="result" step="hub"/>
+    </p:input>
+    <p:input port="stylesheet">
+      <p:pipe port="result" step="load-hub-keywords-stylesheet"/>
+    </p:input>
+    <p:with-param name="archive-dir-uri" select="$archive-dir-uri"/>
+    <p:with-param name="src-type" select="$src-type"/>
+  </p:xslt>
+
   <p:choose>
     <p:when test="$prepend-hub-xml-model='true'">
       <letex:prepend-hub-xml-model>
@@ -100,12 +118,6 @@
   </p:choose>
 
   <p:identity name="include-hub-model"/>
-
-  <letex:store-debug>
-    <p:with-option name="pipeline-step" select="concat('xml-model/',$basename,'.with-PIs')"/>
-    <p:with-option name="active" select="$debug"/>
-    <p:with-option name="base-uri" select="$debug-dir-uri"/>
-  </letex:store-debug>
 
   <letex:validate-with-rng-PI name="rng2pi">
     <p:with-option name="debug" select="$debug"/>
