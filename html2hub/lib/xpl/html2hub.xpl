@@ -18,7 +18,7 @@
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" required="false" select="resolve-uri('debug')"/>
 
-  <p:option name="prepend-hub-xml-model" required="false" select="'true'"/>
+  <p:option name="prepend-hub-xml-model" required="false" select="'false'"/>
   <p:option name="hub-version" select="'1.1'"/>
 
   <p:option name="archive-dir-uri" required="false" select="''"/>
@@ -31,7 +31,7 @@
   <p:input port="other-params" sequence="true" kind="parameter" primary="true"/>
   <p:input port="schema" primary="false">
     <p:documentation>Excepts the Hub RelaxNG XML schema</p:documentation>
-    <p:document href="../../common/../../frontend/schema/Hub/hub.rng"/>
+    <p:document href="../../schema/Hub/hub.rng"/>
   </p:input>
     
   <p:output port="result" primary="true">
@@ -41,6 +41,7 @@
   <p:import href="http://transpect.le-tex.de/css-expand/xpl/css.xpl"/>
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl"/>
+  <p:import href="http://transpect.le-tex.de/xproc-util/xml-model/prepend-hub-xml-model.xpl"/>
   <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/simple-progress-msg.xpl"/>
   <p:import href="http://transpect.le-tex.de/calabash-extensions/ltx-validate-with-rng/rng-validate-to-PI.xpl"/>
   
