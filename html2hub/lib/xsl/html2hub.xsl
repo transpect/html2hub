@@ -400,6 +400,12 @@
     </phrase>
   </xsl:template>
 
+  <xsl:template match="em" mode="html2hub:default">
+    <phrase remap="{local-name()}">
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </phrase>
+  </xsl:template>
+
 
   <!-- text replacements: breaks and multiple whitespace -->
   <xsl:template match="text()[matches(., '(\s\s+|&#xa;)')]" mode="html2hub:default">

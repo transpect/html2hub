@@ -18,7 +18,7 @@
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" required="false" select="resolve-uri('debug')"/>
 
-  <p:option name="prepend-hub-xml-model" required="false" select="'false'"/>
+  <p:option name="prepend-hub-xml-model" required="false" select="'true'"/>
   <p:option name="hub-version" select="'1.1'"/>
 
   <p:option name="archive-dir-uri" required="false" select="''"/>
@@ -69,12 +69,41 @@
       <p:pipe step="html2hub" port="other-params"/>
     </p:input>
   </p:parameters>
-  
+
+  <p:load name="load-normalize-stylesheet" href="../xsl/namespace-normalization.xsl"/>
+
+  <p:choose name="namespaces">
+    <p:when test="/*/namespace-uri() ne 'http://www.w3.org/1999/xhtml'">
+      <p:xpath-context>
+        <p:pipe port="source" step="html2hub"/>
+      </p:xpath-context>
+      <p:xslt name="normalize-namespace">
+        <p:input port="source">
+          <p:pipe port="source" step="html2hub"/>
+        </p:input>
+        <p:input port="stylesheet">
+          <p:pipe port="result" step="load-normalize-stylesheet"/>
+        </p:input>
+        <p:with-param name="archive-dir-uri" select="$archive-dir-uri"/>
+        <p:with-param name="src-type" select="$src-type"/>
+      </p:xslt>
+    </p:when>
+    <p:otherwise>
+      <p:identity>
+        <p:input port="source">
+          <p:pipe port="source" step="html2hub"/>
+        </p:input>
+      </p:identity>
+    </p:otherwise>
+  </p:choose>
+
+  <p:identity name="normalize"/>
+
   <css:expand name="add-css-attributes">
     <p:with-option name="debug" select="$debug" />
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri" />
     <p:input port="source">
-      <p:pipe port="source" step="html2hub"/>
+      <p:pipe port="result" step="normalize"/>
     </p:input>
   </css:expand>
   
