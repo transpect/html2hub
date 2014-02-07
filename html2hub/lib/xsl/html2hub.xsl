@@ -2,6 +2,7 @@
 <xsl:stylesheet 
     version="2.0"
     xmlns:css = "http://www.w3.org/1996/css"
+    xmlns:htmltable="http://www.le-tex.de/namespace/htmltable"
     xmlns:html2hub = "http://www.le-tex.de/namespace/html2hub"
     xmlns:svg = "http://www.w3.org/2000/svg"
     xmlns:xhtml = "http://www.w3.org/1999/xhtml"
@@ -12,6 +13,7 @@
     xpath-default-namespace="http://www.w3.org/1999/xhtml"
     >
 
+  <xsl:import href="../../html-tables/html-tables.xsl" />
 
   <!-- PARAMS -->
 
@@ -266,19 +268,20 @@
       <xsl:when test="not(.//text())">
         <anchor xml:id="{(@xml:id, @id)}"/>
       </xsl:when>
-      <xsl:when test="matches(@href, '^(www\.|http://)')">
+      <xsl:when test="matches(@href, '^(www\.|http://|mailto:)')">
         <link>
           <xsl:attribute name="xlink:href" select="@href"/>
           <xsl:apply-templates mode="#current"/>
         </link>
       </xsl:when>
       <xsl:when test="matches(@href, '^#')">
-        <xref linkend="{substring(@href, 2)}">
+        <link linkend="{substring(@href, 2)}">
           <xsl:apply-templates select="@* except @href, node()" mode="#current"/>
-        </xref>
+        </link>
       </xsl:when>
       <xsl:when test="@href">
-        <link linkend="{@href}">
+        <link>
+          <xsl:attribute name="{if (matches(@href, '#')) then 'xlink:href' else 'linkend'}" select="@href"/>
           <xsl:apply-templates select="@* except @href, node()" mode="#current"/>
         </link>
       </xsl:when>
@@ -312,23 +315,33 @@
     </superscript>
   </xsl:template>
 
-  <xsl:template match="table" mode="html2hub:default">
-    <table>
-      <xsl:apply-templates select="@*, node()" mode="#current"/>
-    </table>
+  <xsl:template match="*[*:tr]" priority="3">
+    <xsl:sequence select="htmltable:normalize(.)" />
   </xsl:template>
 
-  <xsl:template match="tr" mode="html2hub:default">
-    <tr>
-      <xsl:apply-templates select="@*, node()" mode="#current"/>
-    </tr>
-  </xsl:template>
+  <!-- <xsl:template match="table" mode="html2hub:default"> -->
+  <!--   <informaltable> -->
+  <!--     <xsl:apply-templates select="@*, node()" mode="#current"/> -->
+  <!--   </informaltable> -->
+  <!-- </xsl:template> -->
 
-  <xsl:template match="td" mode="html2hub:default">
-    <td>
-      <xsl:apply-templates select="@*, node()" mode="#current"/>
-    </td>
-  </xsl:template>
+  <!-- <xsl:template match="tbody" mode="html2hub:default"> -->
+  <!--   <tgroup> -->
+  <!--     <xsl:apply-templates select="@*, node()" mode="#current"/> -->
+  <!--   </tgroup> -->
+  <!-- </xsl:template> -->
+
+  <!-- <xsl:template match="tr" mode="html2hub:default"> -->
+  <!--   <row> -->
+  <!--     <xsl:apply-templates select="@*, node()" mode="#current"/> -->
+  <!--   </row> -->
+  <!-- </xsl:template> -->
+
+  <!-- <xsl:template match="td" mode="html2hub:default"> -->
+  <!--   <entry> -->
+  <!--     <xsl:apply-templates select="@*, node()" mode="#current"/> -->
+  <!--   </entry> -->
+  <!-- </xsl:template> -->
 
   <xsl:template match="@class" mode="html2hub:default">
     <xsl:attribute name="role" select="."/>
