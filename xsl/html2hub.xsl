@@ -13,7 +13,7 @@
     xpath-default-namespace="http://www.w3.org/1999/xhtml"
     >
 
-  <xsl:import href="../../html-tables/html-tables.xsl" />
+  <xsl:import href="http://transpect.le-tex.de/html-tables/xsl/html-tables.xsl" />
 
   <!-- PARAMS -->
 
