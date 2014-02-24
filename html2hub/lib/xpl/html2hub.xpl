@@ -173,7 +173,7 @@
   </letex:store-debug>
 
   <letex:simple-progress-msg name="success-msg">
-    <p:with-option name="file" select="concat('hub2html-success.',$basename,'.txt')"/>
+    <p:with-option name="file" select="concat('html2hub-success.',$basename,'.txt')"/>
     <p:input port="msgs">
       <p:inline>
         <c:messages>
