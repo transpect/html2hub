@@ -13,7 +13,6 @@
     xpath-default-namespace="http://www.w3.org/1999/xhtml"
     >
 
-  <xsl:import href="http://transpect.le-tex.de/html-tables/xsl/html-tables.xsl" />
 
   <!-- PARAMS -->
 
@@ -315,33 +314,88 @@
     </superscript>
   </xsl:template>
 
-  <xsl:template match="*[*:tr]" priority="3">
-    <xsl:sequence select="htmltable:normalize(.)" />
+
+  <!-- tables-->
+
+  <xsl:template match="table" mode="html2hub:default">
+    <informaltable>
+      <tgroup>
+        <xsl:attribute name="cols" select="descendant-or-self::*[@data-colcount][1]/@data-colcount"/>
+        <xsl:apply-templates select="@*" mode="#current"/>
+        <xsl:apply-templates select="colgroup/col" mode="#current"/>
+        <xsl:apply-templates select="node() except colgroup" mode="#current"/>
+      </tgroup>
+    </informaltable>
   </xsl:template>
 
-  <!-- <xsl:template match="table" mode="html2hub:default"> -->
-  <!--   <informaltable> -->
-  <!--     <xsl:apply-templates select="@*, node()" mode="#current"/> -->
-  <!--   </informaltable> -->
-  <!-- </xsl:template> -->
+  <xsl:template match="@data-colcount" mode="html2hub:default"/>
 
-  <!-- <xsl:template match="tbody" mode="html2hub:default"> -->
-  <!--   <tgroup> -->
-  <!--     <xsl:apply-templates select="@*, node()" mode="#current"/> -->
-  <!--   </tgroup> -->
-  <!-- </xsl:template> -->
+  <xsl:template match="@data-rowcount" mode="html2hub:default"/>
 
-  <!-- <xsl:template match="tr" mode="html2hub:default"> -->
-  <!--   <row> -->
-  <!--     <xsl:apply-templates select="@*, node()" mode="#current"/> -->
-  <!--   </row> -->
-  <!-- </xsl:template> -->
+  <xsl:template match="col" mode="html2hub:default">
+    <colspec>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </colspec>
+  </xsl:template>
 
-  <!-- <xsl:template match="td" mode="html2hub:default"> -->
-  <!--   <entry> -->
-  <!--     <xsl:apply-templates select="@*, node()" mode="#current"/> -->
-  <!--   </entry> -->
-  <!-- </xsl:template> -->
+  <xsl:template match="col/@width" mode="html2hub:default">
+    <xsl:attribute name="colwidth" select="."/>
+  </xsl:template>
+
+  <xsl:template match="col/@span" mode="html2hub:default"/>
+
+  <xsl:template match="tbody | thead | tfoot" mode="html2hub:default">
+    <xsl:element name="{local-name()}">
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="tr" mode="html2hub:default">
+    <row>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </row>
+  </xsl:template>
+
+  <xsl:template match="td | th" mode="html2hub:default">
+    <entry>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:choose>
+        <xsl:when test="not(p)">
+          <para>
+            <xsl:apply-templates select="node()" mode="#current"/>
+          </para>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:apply-templates select="node()" mode="#current"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </entry>
+  </xsl:template>
+
+  <xsl:template match="@data-colnum" mode="html2hub:default">
+    <xsl:attribute name="{if (xs:integer(../@colspan) gt 1) then 'namest' else 'colname'}" select="."/>
+  </xsl:template>
+
+  <xsl:template match="@colspan" mode="html2hub:default">
+    <xsl:if test="xs:integer(.) gt 1">
+      <xsl:attribute name="nameend" select="xs:integer(../@data-colnum) + xs:integer(.) - 1"/>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="@rowspan" mode="html2hub:default">
+    <xsl:if test="xs:integer(.) gt 1">
+      <xsl:attribute name="morerows" select="xs:integer(.) - 1"/>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="@data-rownum" mode="html2hub:default"/>
+
+  <xsl:template match="table/@border" mode="html2hub:default">
+    <xsl:if test="not(parent::*/@css:border-width)">
+      <xsl:attribute name="css:border-width" select="concat(., if (matches(., 'px$')) then '' else 'px')"/>
+    </xsl:if>
+  </xsl:template>
+
 
   <xsl:template match="@class" mode="html2hub:default">
     <xsl:attribute name="role" select="."/>
@@ -437,8 +491,8 @@
     <xsl:element name="{local-name()}" namespace="http://docbook.org/ns/docbook">
       <xsl:apply-templates select="@*, node()" mode="#current"/>
     </xsl:element>
-    <xsl:message select="'WRN HTML2HUB: Unprocessed html element', local-name(), 
-                         if(@class ne '') then concat('with class=&quot;', @class, '&quot;') else 'without class',
+    <xsl:message select="'WRN HTML2HUB: Unprocessed html element', local-name(),
+                         if (@class ne '') then concat('with class=&quot;', @class, '&quot;') else 'without class',
                          'now moved to hub namespace; content:', if(string-join(.//text(),'') eq '') then '[none]' else string-join(.//text(),'')"/>
   </xsl:template>
 
