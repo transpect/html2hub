@@ -7,6 +7,7 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns:xhtml = "http://www.w3.org/1999/xhtml"
   xmlns:dbk="http://docbook.org/ns/docbook"
+  xmlns:htmltable="http://www.le-tex.de/namespace/htmltable"
   xmlns:html2hub="http://www.le-tex.de/namespace/html2hub" 
   xmlns:letex="http://www.le-tex.de/namespace" 
   exclude-inline-prefixes="#all"
@@ -44,6 +45,7 @@
   <p:import href="http://transpect.le-tex.de/xproc-util/xml-model/prepend-hub-xml-model.xpl"/>
   <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/simple-progress-msg.xpl"/>
   <p:import href="http://transpect.le-tex.de/calabash-extensions/ltx-validate-with-rng/rng-validate-to-PI.xpl"/>
+  <p:import href="http://transpect.le-tex.de/html-tables/xpl/add-origin-atts.xpl"/>
   
   <p:variable name="status-dir-uri" select="concat($debug-dir-uri, '/status')"/>
   <p:variable name="basename" select="replace(base-uri(), '^(.+?)([^/\\]+)\.x?html$', '$2')"/>
@@ -106,10 +108,17 @@
       <p:pipe port="result" step="normalize"/>
     </p:input>
   </css:expand>
+
+  <htmltable:add-origin-atts name="add-origin-atts">
+    <p:documentation>Normalizes rowspans and colspans in tables.</p:documentation>
+    <p:input port="source">
+      <p:pipe port="result" step="add-css-attributes"/>
+    </p:input>
+  </htmltable:add-origin-atts>
   
   <p:xslt name="hub" initial-mode="html2hub:default">
     <p:input port="source">
-      <p:pipe port="result" step="add-css-attributes"/>
+      <p:pipe port="result" step="add-origin-atts"/>
     </p:input>
     <p:input port="stylesheet">
       <p:pipe step="html2hub" port="stylesheet"/>
