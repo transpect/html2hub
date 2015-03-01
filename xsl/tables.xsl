@@ -11,6 +11,7 @@
     xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
     xmlns="http://docbook.org/ns/docbook"
     xpath-default-namespace="http://www.w3.org/1999/xhtml"
+    exclude-result-prefixes="#all"
     >
 
   <xsl:template match="table" mode="html2hub:default">
