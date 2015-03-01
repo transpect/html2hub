@@ -317,78 +317,7 @@
 
   <!-- tables-->
 
-  <xsl:template match="table" mode="html2hub:default">
-    <informaltable>
-      <tgroup>
-        <xsl:attribute name="cols" select="descendant-or-self::*[@data-colcount][1]/@data-colcount"/>
-        <xsl:apply-templates select="@*" mode="#current"/>
-        <xsl:apply-templates select="colgroup/col" mode="#current"/>
-        <xsl:apply-templates select="node() except colgroup" mode="#current"/>
-      </tgroup>
-    </informaltable>
-  </xsl:template>
-
-  <xsl:template match="@data-colcount" mode="html2hub:default"/>
-
-  <xsl:template match="@data-rowcount" mode="html2hub:default"/>
-
-  <xsl:template match="col" mode="html2hub:default">
-    <colspec>
-      <xsl:apply-templates select="@*, node()" mode="#current"/>
-    </colspec>
-  </xsl:template>
-
-  <xsl:template match="col/@width" mode="html2hub:default">
-    <xsl:attribute name="colwidth" select="."/>
-  </xsl:template>
-
-  <xsl:template match="col/@span" mode="html2hub:default"/>
-
-  <xsl:template match="tbody | thead | tfoot" mode="html2hub:default">
-    <xsl:element name="{local-name()}">
-      <xsl:apply-templates select="@*, node()" mode="#current"/>
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="tr" mode="html2hub:default">
-    <row>
-      <xsl:apply-templates select="@*, node()" mode="#current"/>
-    </row>
-  </xsl:template>
-
-  <xsl:template match="td | th" mode="html2hub:default">
-    <entry>
-      <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:choose>
-        <xsl:when test="not(p)">
-          <para>
-            <xsl:apply-templates select="node()" mode="#current"/>
-          </para>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:apply-templates select="node()" mode="#current"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </entry>
-  </xsl:template>
-
-  <xsl:template match="@data-colnum" mode="html2hub:default">
-    <xsl:attribute name="{if (xs:integer(../@colspan) gt 1) then 'namest' else 'colname'}" select="."/>
-  </xsl:template>
-
-  <xsl:template match="@colspan" mode="html2hub:default">
-    <xsl:if test="xs:integer(.) gt 1">
-      <xsl:attribute name="nameend" select="xs:integer(../@data-colnum) + xs:integer(.) - 1"/>
-    </xsl:if>
-  </xsl:template>
-
-  <xsl:template match="@rowspan" mode="html2hub:default">
-    <xsl:if test="xs:integer(.) gt 1">
-      <xsl:attribute name="morerows" select="xs:integer(.) - 1"/>
-    </xsl:if>
-  </xsl:template>
-
-  <xsl:template match="@data-rownum" mode="html2hub:default"/>
+  <xsl:include href="tables.xsl"/>
 
   <xsl:template match="table/@border" mode="html2hub:default">
     <xsl:if test="not(parent::*/@css:border-width)">
