@@ -16,9 +16,10 @@
 
   <xsl:template match="table" mode="html2hub:default">
     <informaltable>
+      <xsl:apply-templates select="@class" mode="#current"/>
       <tgroup>
         <xsl:attribute name="cols" select="descendant-or-self::*[@data-colcount][1]/@data-colcount"/>
-        <xsl:apply-templates select="@*" mode="#current"/>
+        <xsl:apply-templates select="@* except @class" mode="#current"/>
         <xsl:apply-templates select="colgroup/col" mode="#current"/>
         <xsl:apply-templates select="node() except colgroup" mode="#current"/>
       </tgroup>
