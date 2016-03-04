@@ -2,8 +2,8 @@
 <xsl:stylesheet 
     version="2.0"
     xmlns:css = "http://www.w3.org/1996/css"
-    xmlns:htmltable="http://www.le-tex.de/namespace/htmltable"
-    xmlns:html2hub = "http://www.le-tex.de/namespace/html2hub"
+    xmlns:htmltable="http://transpect.io/htmltable"
+    xmlns:html2hub = "http://transpect.io/html2hub"
     xmlns:svg = "http://www.w3.org/2000/svg"
     xmlns:xhtml = "http://www.w3.org/1999/xhtml"
     xmlns:xlink = "http://www.w3.org/1999/xlink"
@@ -15,20 +15,42 @@
     >
 
   <xsl:template match="table" mode="html2hub:default">
-    <informaltable>
-      <xsl:apply-templates select="@class" mode="#current"/>
+    <xsl:element name="{if (caption) then 'table' else 'informaltable'}">
+      <xsl:apply-templates select="@class, caption" mode="#current"/>
       <tgroup>
         <xsl:attribute name="cols" select="descendant-or-self::*[@data-colcount][1]/@data-colcount"/>
         <xsl:apply-templates select="@* except @class" mode="#current"/>
         <xsl:apply-templates select="colgroup/col" mode="#current"/>
-        <xsl:apply-templates select="node() except colgroup" mode="#current"/>
+        <xsl:apply-templates select="node() except (colgroup | caption)" mode="#current"/>
       </tgroup>
-    </informaltable>
+    </xsl:element>
+  </xsl:template>
+  
+  <xsl:template match="caption" mode="html2hub:default">
+    <title>
+      <xsl:apply-templates mode="#current"/>
+    </title>
   </xsl:template>
 
   <xsl:template match="@data-colcount" mode="html2hub:default"/>
 
   <xsl:template match="@data-rowcount" mode="html2hub:default"/>
+
+  <xsl:template match="@style" mode="html2hub:default"/>
+  
+  <xsl:template match="@*" mode="html2hub:default">
+    <xsl:message select="'Will drop ', ."/>
+  </xsl:template>
+  
+  <xsl:template match="@id" mode="html2hub:default">
+    <xsl:attribute name="xml:id" select="."/>
+  </xsl:template>
+  
+  <xsl:template match="@css:width" mode="html2hub:default"/>
+
+  <xsl:template match="@css:vertical-align" mode="html2hub:default">
+    <xsl:attribute name="valign" select="."/>
+  </xsl:template>
 
   <xsl:template match="col" mode="html2hub:default">
     <colspec>

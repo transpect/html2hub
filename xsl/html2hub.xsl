@@ -2,8 +2,8 @@
 <xsl:stylesheet 
     version="2.0"
     xmlns:css = "http://www.w3.org/1996/css"
-    xmlns:htmltable="http://www.le-tex.de/namespace/htmltable"
-    xmlns:html2hub = "http://www.le-tex.de/namespace/html2hub"
+    xmlns:htmltable="http://transpect.io/htmltable"
+    xmlns:html2hub = "http://transpect.io/html2hub"
     xmlns:svg = "http://www.w3.org/2000/svg"
     xmlns:xhtml = "http://www.w3.org/1999/xhtml"
     xmlns:xlink = "http://www.w3.org/1999/xlink"

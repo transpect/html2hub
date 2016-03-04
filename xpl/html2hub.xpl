@@ -7,9 +7,9 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns:xhtml = "http://www.w3.org/1999/xhtml"
   xmlns:dbk="http://docbook.org/ns/docbook"
-  xmlns:htmltable="http://www.le-tex.de/namespace/htmltable"
-  xmlns:html2hub="http://www.le-tex.de/namespace/html2hub" 
-  xmlns:letex="http://www.le-tex.de/namespace" 
+  xmlns:htmltable="http://transpect.io/htmltable"
+  xmlns:html2hub="http://transpect.io/html2hub" 
+  xmlns:tr="http://transpect.io" 
   exclude-inline-prefixes="#all"
   version="1.0"
   name="html2hub"
@@ -39,19 +39,19 @@
     <p:pipe port="result" step="include-hub-model"/>
   </p:output>
   
-  <p:import href="http://transpect.le-tex.de/css-expand/xpl/css.xpl"/>
+  <p:import href="http://transpect.io/css-tools/xpl/css.xpl"/>
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
-  <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl"/>
-  <p:import href="http://transpect.le-tex.de/xproc-util/xml-model/prepend-hub-xml-model.xpl"/>
-  <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/simple-progress-msg.xpl"/>
-  <p:import href="http://transpect.le-tex.de/calabash-extensions/ltx-validate-with-rng/rng-validate-to-PI.xpl"/>
-  <p:import href="http://transpect.le-tex.de/html-tables/xpl/add-origin-atts.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/xml-model/xpl/prepend-hub-xml-model.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
+  <p:import href="http://transpect.io/calabash-extensions/rng-extension/xpl/rng-validate-to-PI.xpl"/>
+  <p:import href="http://transpect.io/htmltables/xpl/add-origin-atts.xpl"/>
   
   <p:variable name="status-dir-uri" select="concat($debug-dir-uri, '/status')"/>
   <p:variable name="basename" select="replace(base-uri(), '^(.+?)([^/\\]+)\.x?html$', '$2')"/>
 
 
-  <letex:simple-progress-msg name="start-msg">
+  <tr:simple-progress-msg name="start-msg">
     <p:with-option name="file" select="concat('hub2html-start.',$basename,'.txt')"/>
     <p:input port="msgs">
       <p:inline>
@@ -62,7 +62,7 @@
       </p:inline>
     </p:input>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
-  </letex:simple-progress-msg>
+  </tr:simple-progress-msg>
   
   <p:sink/>
   
@@ -125,10 +125,10 @@
     </p:input>
   </p:xslt>
   
-  <letex:store-debug pipeline-step="html2hub/result" extension="xml">
+  <tr:store-debug pipeline-step="html2hub/result" extension="xml">
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
-  </letex:store-debug>
+  </tr:store-debug>
 
   <p:sink/>
 
@@ -147,9 +147,9 @@
 
   <p:choose>
     <p:when test="$prepend-hub-xml-model='true'">
-      <letex:prepend-hub-xml-model>
+      <tr:prepend-hub-xml-model>
         <p:with-option name="hub-version" select="$hub-version"/>
-      </letex:prepend-hub-xml-model>
+      </tr:prepend-hub-xml-model>
     </p:when>
     <p:otherwise>
       <p:identity/>
@@ -158,21 +158,21 @@
 
   <p:identity name="include-hub-model"/>
 
-  <letex:validate-with-rng-PI name="rng2pi">
+  <tr:validate-with-rng-PI name="rng2pi">
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:input port="schema">
       <p:pipe port="schema" step="html2hub"/>
     </p:input>
-  </letex:validate-with-rng-PI>
+  </tr:validate-with-rng-PI>
   
-  <letex:store-debug>
+  <tr:store-debug>
     <p:with-option name="pipeline-step" select="concat('rngvalid/',$basename,'.with-PIs')"/>
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
-  </letex:store-debug>
+  </tr:store-debug>
 
-  <letex:simple-progress-msg name="success-msg">
+  <tr:simple-progress-msg name="success-msg">
     <p:with-option name="file" select="concat('html2hub-success.',$basename,'.txt')"/>
     <p:input port="msgs">
       <p:inline>
@@ -183,7 +183,7 @@
       </p:inline>
     </p:input>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
-  </letex:simple-progress-msg>
+  </tr:simple-progress-msg>
   
   <p:sink/>
 
