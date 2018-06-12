@@ -19,7 +19,7 @@
   <xsl:param name="debug" select="'no'"/>
   <xsl:param name="debug-dir" select="'debug'"/>
   <xsl:param name="hierarchy-by-h-elements" select="'no'"/><!-- hierarchization should be done by evolve-hub -->
-  
+  <xsl:param name="shorthand-css" select="'no'"/>  
 
   <!-- VARIABLES -->
   
@@ -27,7 +27,10 @@
       name="html2hub-basename" 
       select="replace(tokenize(base-uri(/),'/')[last()],'.hub.xml','')" 
       as="xs:string"/>
-
+  
+  <xsl:variable name="is-shorthand-css"
+      select="$shorthand-css = 'yes'"
+      as="xs:boolean"/>
 
   <!-- OUTPUT -->
   
@@ -59,13 +62,13 @@
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
   <xsl:template match="html" mode="html2hub:default">
-    <chapter>
+    <hub>
       <xsl:apply-templates select="@xml:base" mode="#current" />
       <info>
         <title/>
       </info>
       <xsl:apply-templates mode="#current"/>
-    </chapter>
+    </hub>
   </xsl:template>
 
   <xsl:template match="head" mode="html2hub:default" />
@@ -380,18 +383,28 @@
 
   <xsl:template match="u" mode="html2hub:default">
     <phrase remap="{local-name()}">
-      <xsl:if test="not(@css:text-decoration)">
-        <xsl:attribute name="css:text-decoration" select="'underline'"/>
-      </xsl:if>
+      <xsl:choose>
+        <xsl:when test="not(@css:text-decoration) and $is-shorthand-css">
+          <xsl:attribute name="css:text-decoration" select="'underline'"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:attribute name="css:text-decoration-line" select="'underline'"/>
+        </xsl:otherwise>
+      </xsl:choose>
       <xsl:apply-templates select="@*|node()" mode="#current"/>
     </phrase>
   </xsl:template>
 
   <xsl:template match="strike | s" mode="html2hub:default">
     <phrase remap="{local-name()}">
-      <xsl:if test="not(@css:text-decoration)">
-        <xsl:attribute name="css:text-decoration" select="'line-through'"/>
-      </xsl:if>
+      <xsl:choose>
+        <xsl:when test="not(@css:text-decoration) and $is-shorthand-css">
+          <xsl:attribute name="css:text-decoration" select="'line-trough'"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:attribute name="css:text-decoration-line" select="'line-trough'"/>
+        </xsl:otherwise>
+      </xsl:choose>
       <xsl:apply-templates select="@*|node()" mode="#current"/>
     </phrase>
   </xsl:template>

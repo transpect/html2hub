@@ -24,6 +24,8 @@
 
   <p:option name="archive-dir-uri" required="false" select="''"/>
   <p:option name="src-type" required="false" select="'xhtml11'"/>
+  
+  <p:option name="shorthand-css" required="false" select="'no'"/>
 
   <p:input port="source" primary="true"/>
   <p:input port="stylesheet">
@@ -46,11 +48,12 @@
   <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
   <p:import href="http://transpect.io/calabash-extensions/rng-extension/xpl/rng-validate-to-PI.xpl"/>
   <p:import href="http://transpect.io/htmltables/xpl/add-origin-atts.xpl"/>
-  
+
+
+
   <p:variable name="status-dir-uri" select="concat($debug-dir-uri, '/status')"/>
   <p:variable name="basename" select="replace(base-uri(), '^(.+?)([^/\\]+)\.x?html$', '$2')"/>
-
-
+    
   <tr:simple-progress-msg name="start-msg">
     <p:with-option name="file" select="concat('hub2html-start.',$basename,'.txt')"/>
     <p:input port="msgs">
@@ -123,6 +126,7 @@
     <p:input port="stylesheet">
       <p:pipe step="html2hub" port="stylesheet"/>
     </p:input>
+    <p:with-param name="shorthand-css" select="$shorthand-css"/>
   </p:xslt>
   
   <tr:store-debug pipeline-step="html2hub/result" extension="xml">
