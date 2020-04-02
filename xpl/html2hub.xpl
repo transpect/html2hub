@@ -26,6 +26,11 @@
   <p:option name="src-type" required="false" select="'xhtml11'"/>
   
   <p:option name="shorthand-css" required="false" select="'no'"/>
+  <p:option name="keep-css-atts" required="false" select="'no'"/>
+  
+  <p:option name="mediaquery-constraint" required="false" select="''"/>
+    
+  
 
   <p:input port="source" primary="true"/>
   <p:input port="stylesheet">
@@ -41,6 +46,10 @@
     <p:pipe port="result" step="include-hub-model"/>
   </p:output>
   
+  <p:output port="css-xml-representation">
+    <p:pipe port="xml-representation" step="add-css-attributes"/>
+  </p:output>
+  
   <p:import href="http://transpect.io/css-tools/xpl/css.xpl"/>
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
@@ -48,8 +57,6 @@
   <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
   <p:import href="http://transpect.io/calabash-extensions/rng-extension/xpl/rng-validate-to-PI.xpl"/>
   <p:import href="http://transpect.io/htmltables/xpl/add-origin-atts.xpl"/>
-
-
 
   <p:variable name="status-dir-uri" select="concat($debug-dir-uri, '/status')"/>
   <p:variable name="basename" select="replace(base-uri(), '^(.+?)([^/\\]+)\.x?html$', '$2')"/>
@@ -107,17 +114,28 @@
   <css:expand name="add-css-attributes">
     <p:with-option name="debug" select="$debug" />
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri" />
+    <p:with-option name="mediaquery-constraint" select="$mediaquery-constraint"/>
     <p:input port="source">
       <p:pipe port="result" step="normalize"/>
     </p:input>
   </css:expand>
+  
+  <tr:store-debug name="store-cssatts" pipeline-step="html2hub/01.add-css-attributes" extension="xml">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>
+  
+  
 
   <htmltable:add-origin-atts name="add-origin-atts">
     <p:documentation>Normalizes rowspans and colspans in tables.</p:documentation>
-    <p:input port="source">
-      <p:pipe port="result" step="add-css-attributes"/>
-    </p:input>
+    
   </htmltable:add-origin-atts>
+  
+  <tr:store-debug name="store-origin" pipeline-step="html2hub/02.add-origin-atts" extension="xml">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>
   
   <p:xslt name="hub" initial-mode="html2hub:default">
     <p:input port="source">
@@ -127,13 +145,14 @@
       <p:pipe step="html2hub" port="stylesheet"/>
     </p:input>
     <p:with-param name="shorthand-css" select="$shorthand-css"/>
+    <p:with-param name="keep-css-atts" select="$keep-css-atts"/>
   </p:xslt>
   
-  <tr:store-debug pipeline-step="html2hub/result" extension="xml">
+  <tr:store-debug name="store-hub" pipeline-step="html2hub/03.html2hub-default" extension="xml">
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </tr:store-debug>
-
+  
   <p:sink/>
 
   <p:load name="load-hub-keywords-stylesheet" href="../xsl/hub-keywords.xsl"/>
@@ -148,6 +167,11 @@
     <p:with-param name="archive-dir-uri" select="$archive-dir-uri"/>
     <p:with-param name="src-type" select="$src-type"/>
   </p:xslt>
+  
+  <tr:store-debug pipeline-step="html2hub/04.html2hub-hub-keywords" extension="xml">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>
 
   <p:choose>
     <p:when test="$prepend-hub-xml-model='true'">

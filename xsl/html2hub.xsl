@@ -19,7 +19,9 @@
   <xsl:param name="debug" select="'no'"/>
   <xsl:param name="debug-dir" select="'debug'"/>
   <xsl:param name="hierarchy-by-h-elements" select="'no'"/><!-- hierarchization should be done by evolve-hub -->
-  <xsl:param name="shorthand-css" select="'no'"/>  
+  <xsl:param name="shorthand-css" select="'no'"/>
+  <xsl:param name="keep-css-atts" select="'no'"/>  
+
 
   <!-- VARIABLES -->
   
@@ -142,7 +144,7 @@
     <xsl:attribute name="annotations" select="."/>
   </xsl:template>
 
-  <xsl:template match="div" mode="html2hub:default">
+  <xsl:template match="div | section" mode="html2hub:default">
     <xsl:element name="{local-name()}">
       <xsl:apply-templates select="@*, node()" mode="#current"/>
     </xsl:element>
@@ -427,6 +429,10 @@
     <xsl:copy>
       <xsl:apply-templates select="@*, node()" mode="#current" />
     </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="@css:*[$keep-css-atts]" mode="html2hub:default">
+    <xsl:copy/>
   </xsl:template>
 
   <xsl:template match="xhtml:*" mode="html2hub:default">
